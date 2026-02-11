@@ -1,33 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:water/detail_page.dart';
-//import 'about_page.dart';
-import 'catalog_products.dart';
+import 'detail_page.dart';
+import 'models/product.dart';
+import 'services/http_service.dart';
 
-class MylistPage extends StatelessWidget {
-  const MylistPage({super.key});
+class MyListPage extends StatefulWidget {
+  const MyListPage({super.key});
+
+  @override
+  State<MyListPage> createState() => _MyListPageState();
+}
+
+class _MyListPageState extends State<MyListPage> {
+  final HttpService httpService = HttpService();
+
+  final String baseUrl = 'https://itpart.net/mobile/api/products.php';
+  final String baseImgUrl = 'https://itpart.net/mobile/images/';
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 220, 255, 242),
-      appBar: AppBar(title: const Text('My List Page')),
-
-      body: ListView.separated(
-        itemCount: CatalogProducts.items.length,
-        itemBuilder: (context,index) => ListTile(
-          leading: Image.network(CatalogProducts.items[index].imageURL),
-          title: Text(CatalogProducts.items[index].title),
-          subtitle: Text(CatalogProducts.items[index].desc),
-
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => DetailPage(
-              product: CatalogProducts.items[index],
-            )),
-          ),
-          ),
-          separatorBuilder: (context, index) => const Divider(),
+      appBar: AppBar(
+        backgroundColor: Colors.amberAccent,
+        title: const Text('My Product List'),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: FutureBuilder<List<Product>>(
+          future: httpService.fetchData(strUrl: baseUrl),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } 
+            
+         
+            else if (snapshot.hasError) {
+              return Text('เกิดข้อผิดพลาด: ${snapshot.error}');
+            } 
+            
+            
+            else if (snapshot.hasData && snapshot.data != null) {
+              List<Product> products = snapshot.data!;
+              
+              return ListView.separated(
+                padding: const EdgeInsets.all(8),
+                itemCount: products.length,
+                separatorBuilder: (context, index) => const Divider(),
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  
+                  return ListTile(
+                    
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        '$baseImgUrl/${product.imageURL}',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.image_not_supported, size: 40),
+                      ),
+                    ),
+                    
+                    title: Text(
+                      product.title,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    
+                    subtitle: Text(
+                      product.desc,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                         builder: (context) => DetailPage(product: product), 
+                         
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            } 
+            
+            
+            else {
+              return const Text('ไม่พบข้อมูลสินค้า');
+            }
+          },
+        ),
       ),
     );
   }

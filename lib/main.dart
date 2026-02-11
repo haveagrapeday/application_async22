@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:water/about_page.dart';
-import 'package:water/topup_page.dart';
+import 'package:water/bottom_navbar_page.dart';
+import 'package:water/detail_page.dart';
 import 'package:water/home_page.dart';
+import 'package:water/my_homepage_sharedpref.dart';
+import 'package:water/topup_page.dart';
+// import 'package:water/my_home_page.dart';
 import 'package:water/topup_report.dart';
 import 'package:water/balance_page.dart';
 import 'package:water/mylist_page.dart';
@@ -26,8 +30,10 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const HttpBasic(),
-        '/about': (context) => const AboutPage(),
+        '/': (context) => const MyListPage(),
+        //'/about': (context) => const AboutPage(),
+
+
         //'/display' : (context) => const DisplayPage(name: ''),
       },
     );
